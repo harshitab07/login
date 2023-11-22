@@ -6,13 +6,30 @@ async function onSignIn(googleUser) {
     // console.log('Email: ' + profile.getEmail());
 
     // save account details in mongoDb;
-    const loginUrl = 'http://localhost:8080/api/v1/auth/login';
-    const res = await axios.post(loginUrl, { email: profile.getEmail(), name: profile.getName(), image: profile.getImageUrl() });
+  const loginUrl = 'http://localhost:8080/api/v1/auth/login';
+  try {
+    const res = await fetch(loginUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: profile.getEmail(),
+        name: profile.getName(),
+        image: profile.getImageUrl(),
+      }),
+    });
 
-    if (!res.data.success) window.alert(res.data.message);
-    else {
-      localStorage.setItem('auth', JSON.stringify(res.data));
+    if (!res.ok) {
+      const data = await res.json();
+      window.alert(data.message);
+    } else {
+      const data = await res.json();
+      localStorage.setItem('auth', JSON.stringify(data));
     }
+  } catch (error) {
+    console.error('Error:', error);
+  }
   }
 
 function signOut() {
